@@ -213,8 +213,23 @@ function exportManychatContacts() {
     // custom_field_EMAIL: Campo personalizado para o Email
     // custom_field_DATA_ABERTURA: Campo personalizado para a Data de Abertura
     const header = ['Whatsapp Id', 'First Name', 'Frase Padrao'].join(',');
-    
-    const dataLines = allResults.map(empresa => {
+
+    // 1. FILTRAGEM: Aplica o filtro de Razão Social solicitado pelo usuário
+    const filteredResults = allResults.filter(empresa => {
+        const razaoSocial = empresa.company?.name || '';
+        // Regex para o formato "XX.XXX.XXX nome completo" (ou similar)
+        // O padrão é: começa com 2 dígitos, ponto, 3 dígitos, ponto, 3 dígitos, seguido por espaço.
+        // Exemplo: "64.091.174 nome completo"
+        const regex = /^\d{2}\.\d{3}\.\d{3}\s+/;
+        return regex.test(razaoSocial);
+    });
+
+    if (filteredResults.length === 0) {
+        alert('Nenhum resultado encontrado após a filtragem de Razão Social.');
+        return;
+    }
+
+    const dataLines = filteredResults.map(empresa => {
         const cnpj = empresa.taxId || 'N/A';
         const razaoSocial = empresa.company?.name || 'N/A';
         // Remove a parte inicial que é o CNPJ/números (se houver)
